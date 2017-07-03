@@ -31,5 +31,5 @@ class LoginLogoutSimulation extends Simulation {
     .pause(2)
     .exec(silverpeas.logout)
 
-  setUp(scn.inject(rampUsers(userCount) over (duration seconds))).protocols(httpProtocol)
+  setUp(scn.inject(rampUsers(userCount) over (duration minutes))).protocols(httpProtocol)
 }

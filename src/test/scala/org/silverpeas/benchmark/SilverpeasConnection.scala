@@ -5,11 +5,12 @@ import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
 /**
- * The Silverpeas class is responsible to connect to the remote Silverpeas application.
-  *
-  * @author mmoquillon
+ * The SilverpeasConnection class is responsible to open a connection to the remote Silverpeas
+ * application. Id est to sign in with the credentials of a user and to logout.
+ *
+ * @author mmoquillon
  */
-class Silverpeas(val conf: Config) {
+class SilverpeasConnection(val conf: Config) {
 
   private val appPath: String = conf.getString("silverpeas")
   private val defaultUserDomainId: String = conf.getString("users.domainId")

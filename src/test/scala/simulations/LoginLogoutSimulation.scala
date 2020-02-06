@@ -21,18 +21,24 @@ class LoginLogoutSimulation extends Simulation {
 
   val users = ssv("data/users.ssv")
   val silverpeas = new SilverpeasConnection(conf)
+  val headers = Map(
+    "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
 
   val httpProtocol = http
     .baseUrl(host)
-    .inferHtmlResources(BlackList(""".*\.js\?v=.*""", """.*\.css\?v=.*""", """.*\.css""", """.*\.jpg""", """.*\.gif""", """.*\.png""", """.*\.svg""", """.*\.ico"""), WhiteList())
+    .inferHtmlResources(BlackList(""".*\.js\?v=.*""", """.*\.css\?v=.*""", """.*\.css""", """.*\.js""", """.*\.jpg""", """.*\.gif""", """.*\.png""", """.*\.svg""", """.*\.ico"""), WhiteList())
     .acceptHeader("*/*")
     .acceptEncodingHeader("gzip, deflate")
-    .acceptLanguageHeader("en-US,en;q=0.5")
+    .acceptLanguageHeader("fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7")
     .doNotTrackHeader("1")
-    .userAgentHeader("Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0")
+    .userAgentHeader("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
 
   val scn = scenario("Login and logout")
     .feed(users)
+    .exec(http("First access")
+      .get("/silverpeas/")
+      .headers(headers))
+    .pause(2)
     .exec(silverpeas.login)
     .pause(2)
     .exec(silverpeas.logout)

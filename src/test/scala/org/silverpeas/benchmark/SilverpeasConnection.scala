@@ -14,7 +14,6 @@ import io.gatling.http.Predef._
 class SilverpeasConnection(val conf: Config) {
 
   private val appPath: String = conf.getString("silverpeas")
-  private val defaultUserDomainId: String = conf.getString("users.domainId")
 
   private val headers =
     Map("Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
@@ -25,7 +24,7 @@ class SilverpeasConnection(val conf: Config) {
     .formParam("Login", "${Login}")
     .formParam("cryptedPassword", "")
     .formParam("Password", "${Password}")
-    .formParam("DomainId", defaultUserDomainId))
+    .formParam("DomainId", "${Domain}"))
 
   val logout = exec(http("Logout")
     .get(appPath + "/Logout")

@@ -19,7 +19,7 @@ class LoginLogoutSimulation extends Simulation {
   val userCount: Int = conf.getInt("users.count")
   val duration: Int = conf.getInt("users.duration")
 
-  val users = ssv("data/users.ssv")
+  val users = ssv("data/users.ssv").circular
   val silverpeas = new SilverpeasConnection(conf)
   val headers = Map(
     "Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")

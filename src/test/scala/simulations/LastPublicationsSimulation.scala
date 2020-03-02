@@ -1,13 +1,11 @@
 package simulations
 
-import com.typesafe.config.{Config, ConfigFactory}
 import io.gatling.core.Predef._
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef._
-import io.gatling.http.protocol.HttpProtocolBuilder
-import org.silverpeas.benchmark.{SilverpeasConnection, SilverpeasFilters, SilverpeasHeaders}
-
+import org.silverpeas.benchmark.{HttpProtocol, SilverpeasConnection, SimulationContext, SilverpeasFilters, SilverpeasHeaders, UsersFeeder}
 import scala.concurrent.duration._
+import scala.language.reflectiveCalls
 
 /**
  * Simulates a sequence where publication services are involved into the getting of last
@@ -18,52 +16,39 @@ import scala.concurrent.duration._
  * if configured as well, the page displays also the last publications.
  * @author silveryocha
  */
-class LastPublicationsSimulation extends Simulation {
+class LastPublicationsSimulation extends Simulation with HttpProtocol with SimulationContext {
 
-  val conf: Config = ConfigFactory.load()
-  val host: String = conf.getString("host")
-  val userCount: Int = conf.getInt("users.count")
-  val duration: Int = conf.getInt("users.duration")
-
-  val users: Array[Map[String, Any]] = ssv("data/users.ssv").readRecords.filter(u => u("Domain").equals("3")).toArray
+  val users: Array[Map[String, Any]] = UsersFeeder.onDomain("3")
   val aimedFullSpaceId: Any = ssv("data/spaces.ssv").readRecords.filter(s => s("TechId").equals("290")).head("Id");
   val otherUserProfileIdThanMe: Any = users.head("Id")
 
-  val silverpeasCon = new SilverpeasConnection(conf)
-  val silverpeasFilters = new SilverpeasFilters(conf)
-  val silverpeasHeaders = new SilverpeasHeaders()
+  override val filters = new SilverpeasFilters(conf)
+  val silverpeasHeaders = new SilverpeasHeaders(conf)
+  val silverpeas = new SilverpeasConnection(conf)
 
-  val httpProtocol: HttpProtocolBuilder = http
-    .baseUrl(host)
-    .inferHtmlResources(silverpeasFilters.getBlackList, silverpeasFilters.getWhiteList)
-    .acceptHeader("*/*")
-    .acceptEncodingHeader("gzip, deflate")
-    .acceptLanguageHeader("en-US,en;q=0.9")
-    .doNotTrackHeader("1")
-    .userAgentHeader("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
-
-  val scn: ScenarioBuilder = scenario("LastPublicationsSimulation")
+  val scn: ScenarioBuilder = scenario("Access to a space with the last publications and the user contacts")
     .feed(users)
-    .exec(silverpeasCon.login)
+    .exec(silverpeas.login)
     .pause(2)
     .exec(http("request_space-homepage-navigation")
-      .get(s"/silverpeas/RAjaxSilverpeasV5/dummy?ResponseId=spaceUpdater&Init=0&GetPDC=false&SpaceId=${aimedFullSpaceId}&&ietrick=120ie1t6r9i11c55k580")
+      .get(s"${appPath}/RAjaxSilverpeasV5/dummy?ResponseId=spaceUpdater&Init=0&GetPDC=false&SpaceId=${aimedFullSpaceId}&&ietrick=120ie1t6r9i11c55k580")
       .headers(silverpeasHeaders.ajax)
       .resources(http("request_space-homepage-content")
-        .get(s"/silverpeas/dt?SpaceId=${aimedFullSpaceId}")
+        .get(s"${appPath}/dt?SpaceId=${aimedFullSpaceId}")
         .headers(silverpeasHeaders.page)))
     .pause(1)
     .exec(http("request_contact_portlet")
-      .get(s"/silverpeas/services/profile/users/${otherUserProfileIdThanMe}?extended=true&_=1580976717425")
+      .get(s"${appPath}/services/profile/users/${otherUserProfileIdThanMe}?extended=true&_=1580976717425")
       .headers(silverpeasHeaders.ajax)
       .resources(http(s"request_user-profile_${otherUserProfileIdThanMe}")
-        .get(s"/silverpeas/services/profile/users/${otherUserProfileIdThanMe}")
+        .get(s"${appPath}/services/profile/users/${otherUserProfileIdThanMe}")
         .headers(silverpeasHeaders.ajax),
         http("request_user-profile_me")
-          .get("/silverpeas/services/profile/users/me")
+          .get(s"${appPath}/services/profile/users/me")
           .headers(silverpeasHeaders.ajax)))
     .pause(2)
-    .exec(silverpeasCon.logout)
+    .exec(silverpeas.logout)
 
-  setUp(scn.inject(rampUsers(userCount) during (duration minutes))).protocols(httpProtocol)
+  setUp(scn.inject(rampUsers(usersInjection.count) during (usersInjection.duration minutes)))
+    .protocols(httpProtocol)
 }

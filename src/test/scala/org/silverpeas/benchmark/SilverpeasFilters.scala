@@ -3,8 +3,6 @@ package org.silverpeas.benchmark
 import com.typesafe.config.Config
 import io.gatling.core.filter.{BlackList, WhiteList}
 
-import collection.JavaConverters._
-
 /**
  * The SilverpeasFilters class permits to prepare blacklist and whitelist to specify to a scenario.
  * @author silveryocha

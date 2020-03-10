@@ -1,6 +1,5 @@
 package org.silverpeas.benchmark
 
-import com.typesafe.config.Config
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 import io.gatling.http.protocol.HttpProtocolBuilder

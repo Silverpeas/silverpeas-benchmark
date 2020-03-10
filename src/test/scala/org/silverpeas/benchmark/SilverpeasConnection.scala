@@ -2,6 +2,7 @@ package org.silverpeas.benchmark
 
 import com.typesafe.config.Config
 import io.gatling.core.Predef._
+import io.gatling.core.structure.ChainBuilder
 import io.gatling.http.Predef._
 
 /**
@@ -18,7 +19,7 @@ class SilverpeasConnection(val conf: Config) {
   private val headers =
     Map("Accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 
-  val login = exec(http("Authentication")
+  val login: ChainBuilder = exec(http("Authentication")
     .post(appPath + "/AuthenticationServlet")
     .headers(headers)
     .formParam("Login", "${Login}")
@@ -26,7 +27,7 @@ class SilverpeasConnection(val conf: Config) {
     .formParam("Password", "${Password}")
     .formParam("DomainId", "${Domain}"))
 
-  val logout = exec(http("Logout")
+  val logout: ChainBuilder = exec(http("Logout")
     .get(appPath + "/Logout")
     .headers(headers))
 }

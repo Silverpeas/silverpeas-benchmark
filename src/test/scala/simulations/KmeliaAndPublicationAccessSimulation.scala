@@ -16,13 +16,6 @@ import scala.language.reflectiveCalls
  * @author mmoquillon
  */
 class KmeliaAndPublicationAccessSimulation extends Simulation with HttpProtocol with SimulationContext {
-  // the users to use in the simulation
-  println("Load users for the simulation...")
-  val users: Array[Map[String, Any]] = UsersFeeder.onDomain("3")
-  val pubLastModifierId: Any = users.head("Id")
-  val pubCreatorId: Any = users(1)("Id")
-  val pubValidatorId: Any = users(2)("Id")
-
   // the Kmelia instance to access. We choose a specific one here to ensure to have a deep folders
   // tree hierarchy and some publications
   println("Find the targeted Kmelia instance...")
@@ -32,6 +25,14 @@ class KmeliaAndPublicationAccessSimulation extends Simulation with HttpProtocol 
     .filter(a => a("TechId").equals("27859"))
   val kmeliaId: Any = targetedKmelia.head("Id")
   val spaceId: Any = targetedKmelia.head("Space")
+
+  // the users to use in the simulation
+  print("Load users... ")
+  val users: Array[Map[String, Any]] = UsersFeeder.filter.onDomain("3").feed()
+  println(s"${users.length} users")
+  val pubLastModifierId: Any = users.head("Id")
+  val pubCreatorId: Any = users(1)("Id")
+  val pubValidatorId: Any = users(2)("Id")
 
   // we look for an existing publication in the Kmelia that is in an inner folder
   println(s"Find a publication to view in ${kmeliaId}...")

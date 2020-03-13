@@ -18,8 +18,12 @@ import scala.language.reflectiveCalls
  */
 class LastPublicationsSimulation extends Simulation with HttpProtocol with SimulationContext {
 
-  val users: Array[Map[String, Any]] = UsersFeeder.onDomain("3")
-  val aimedFullSpaceId: Any = ssv("data/spaces.ssv").readRecords.filter(s => s("TechId").equals("290")).head("Id");
+  print("Load users... ")
+  val users: Array[Map[String, Any]] = UsersFeeder.filter.onDomain("3").feed()
+  println(s"${users.length} users")
+
+  val aimedFullSpaceId: Any = ssv("data/spaces.ssv").readRecords
+    .filter(s => s("TechId").equals("290")).head("Id");
   val otherUserProfileIdThanMe: Any = users.head("Id")
 
   override val filters = new SilverpeasFilters(conf)

@@ -23,7 +23,7 @@ object UsersFeeder {
 
     def onAccessRightTo(appInstId: Any): Filter = {
       val acl: Seq[Record[Any]] = ssv(s"data/${appInstId}.ssv").readRecords
-      new Filter(users.filter(u => acl.exists(a => a("UserId").equals(u))))
+      new Filter(users.filter(u => acl.exists(a => a("UserId").equals(u("Id")))))
     }
 
     def feed(): Array[Record[Any]] = users.toArray

@@ -28,7 +28,10 @@ class KmeliaAndPublicationAccessSimulation extends Simulation with HttpProtocol 
 
   // the users to use in the simulation
   print("Load users... ")
-  val users: Array[Map[String, Any]] = UsersFeeder.filter.onDomain("3").feed()
+  val users: Array[Map[String, Any]] = UsersFeeder.filter
+    .onDomain("3")
+    .onAccessRightTo(kmeliaId)
+    .feed()
   println(s"${users.length} users")
   val pubLastModifierId: Any = users.head("Id")
   val pubCreatorId: Any = users(1)("Id")
